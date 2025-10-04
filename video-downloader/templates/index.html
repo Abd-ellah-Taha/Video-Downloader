@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Video Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body{font-family: Arial, sans-serif; max-width:720px;margin:40px auto;padding:0 16px}
+    input, button{padding:8px 12px;font-size:16px}
+    .row{display:flex;gap:8px}
+    #status{margin-top:16px}
+  </style>
+</head>
+<body>
+  <h2>Video Downloader</h2>
+  <div>
+    <div class="row">
+      <input id="url" placeholder="Paste video URL" style="flex:1" />
+      <button id="go">Download</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+<script>
+async function post(url, body){
+  const res = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+  return res.json();
+}
+
+async function get(url){
+  const res = await fetch(url);
+  return res.json();
+}
+
+document.getElementById('go').addEventListener('click', async ()=>{
+  const u = document.getElementById('url').value.trim();
+  if(!u) return alert('enter url');
+  const r = await post('/api/download', {url: u});
+  if(r.job_id){
+    document.getElementById('status').innerText = 'job: '+r.job_id;
+    // poll status
+    const id = r.job_id;
+    const iv = setInterval(async ()=>{
+      const s = await get('/api/status/'+id);
+      document.getElementById('status').innerText = JSON.stringify(s);
+      if(s.status === 'finished' && s.result && s.result.filename){
+        clearInterval(iv);
+        const link = '/downloads/'+s.result.filename;
+        document.getElementById('status').innerHTML = 'finished: <a href="'+link+'">download</a>';
+      }
+      if(s.status === 'failed'){
+        clearInterval(iv);
+        document.getElementById('status').innerText = 'failed';
+      }
+    }, 2000);
+  } else {
+    alert(JSON.stringify(r));
+  }
+});
+</script>
+</body>
+</html>
