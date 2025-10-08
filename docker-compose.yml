@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - '5000:5000'
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DOWNLOAD_FOLDER=/app/downloads
+    depends_on:
+      - redis
+    volumes:
+      - .:/app
+  redis:
+    image: redis:7-alpine
+  worker:
+    build: .
+    command: ["/app/worker_entry.sh"]
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DOWNLOAD_FOLDER=/app/downloads
+    volumes:
+      - .:/app

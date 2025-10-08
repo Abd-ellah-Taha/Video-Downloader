@@ -1,0 +1,7 @@
+Flask==2.2.5
+yt-dlp==2025.08.01
+redis==4.5.5
+rq==1.11.0
+requests==2.31.0
+gunicorn==20.1.0
+python-dotenv==1.0.0
