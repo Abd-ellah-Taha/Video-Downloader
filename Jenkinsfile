@@ -7,7 +7,7 @@ pipeline {
     stage('Checkout') { steps { checkout scm } }
     stage('Lint & Test') {
       steps {
-        sh 'python -m pip install -r requirements.txt'
+        sh 'python3 -m pip install -r requirements.txt'
         sh 'flake8 || true'
       }
     }
